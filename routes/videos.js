@@ -2,11 +2,20 @@ const express = require('express');
 const router = express.Router();
 const Video = require('../models/Video');
 const HttpStatus = require('http-status-codes');  // npm install http-status-codes
+const mongoose = require('mongoose');
 
 // Get a random video
 router.get('/random-video', async (req, res) => {
   try {
-    const video = await Video.aggregate([{ $sample: { size: 1 } }]);
+    const currentVideoId = req.query.currentVideoId;
+    let query = [{ $sample: { size: 1 } }];
+
+    if (currentVideoId) {
+      query.unshift({ $match: { _id: { $ne: new mongoose.Types.ObjectId(currentVideoId) } } }); // Exclude the current video only if ID is provided
+    }
+
+    const video = await Video.aggregate(query);
+
     if (!video.length) {
       return res.status(HttpStatus.NOT_FOUND).send('No videos found');
     }
@@ -16,6 +25,7 @@ router.get('/random-video', async (req, res) => {
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send('Server error');
   }
 });
+
 
 // Check answer
 router.post('/videos/:id/guess', async (req, res) => {

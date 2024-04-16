@@ -36,9 +36,15 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
+async function dropDatabase() {
+  await mongoose.connection.dropDatabase();
+  console.log("Database dropped.");
+}
+
 // Function to add a video document
 async function addVideo() {
   try {
+    dropDatabase();
     const video = await Video.create({
       url: "http://localhost:5000/videos/video01.mp4",
       sentence: "＿だようね",
@@ -49,8 +55,20 @@ async function addVideo() {
       sentence: "＿",
       word: "かべ",
     });
+    const video3 = await Video.create({
+      url: "http://localhost:5000/videos/video03.mp4",
+      sentence: "＿お願いします",
+      word: "よろしく",
+    });
+    const video4 = await Video.create({
+      url: "http://localhost:5000/videos/video04.mp4",
+      sentence: "＿って",
+      word: "キモイ",
+    });
     console.log("Video added:", video);
     console.log("Video 2 added:", video2);
+    console.log("Video 3 added:", video3);
+    console.log("Video 4 added:", video4);
   } catch (error) {
     console.error("Error adding video:", error);
   }
